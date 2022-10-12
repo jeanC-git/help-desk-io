@@ -4,6 +4,10 @@ import {
     Entity, OneToMany, PrimaryGeneratedColumn
 } from "typeorm";
 
+import { Ticket } from "src/tickets/entities/ticket.entity";
+import { Expose } from "class-transformer";
+import { Record } from "src/tickets/entities/record.entity";
+
 
 @Entity('users')
 export class User {
@@ -30,7 +34,7 @@ export class User {
 
     @Column('text')
     name: string;
-    
+
     @Column('text')
     surname: string;
 
@@ -48,15 +52,30 @@ export class User {
     })
     roles: string[];
 
+    @OneToMany(
+        () => Ticket,
+        (ticket) => ticket.creator
+    )
+    tickets: Ticket[];
+
+
+    @OneToMany(
+        () => Record,
+        (record) => record.creator
+    )
+    ticket_records: Record[];
+
     // @OneToMany(
     //     () => Product,
     //     ( product ) => product.user
     // )
     // product: Product;
 
-    getFullName(){
-        return `${this.name}, ${this.lastname} ${this.surname}`;
+    @Expose()
+    get fullName(): string {
+        return `${this.name}, ${this.surname} ${this.lastname}`;
     }
+
 
     @BeforeInsert()
     checkFieldsBeforeInsert() {

@@ -36,7 +36,7 @@ export class ProductsService {
       const product = this.productRepository.create({
         ...productDetails,
         images: images.map(string => this.productImageRepository.create({ url: string })),
-        user
+        // user
       });
 
       await this.productRepository.save(product);
@@ -123,7 +123,7 @@ export class ProductsService {
         );
       }
 
-      product.user = user;
+      // product.user = user;
 
       await queryRunner.manager.save(product);
 

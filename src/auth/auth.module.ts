@@ -8,12 +8,14 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User } from './entities/user.entity';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { TicketsModule } from 'src/tickets/tickets.module';
 
 @Module({
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
   imports: [
     ConfigModule,
+    
     TypeOrmModule.forFeature([User]),
 
     PassportModule.register({ defaultStrategy: 'jwt', }),
@@ -32,9 +34,11 @@ import { JwtStrategy } from './strategies/jwt.strategy';
             expiresIn: '2h'
           }
         }
-      }
-    }),
+      },
 
+      
+    })
+    
     // JwtModule.register({
     //   secret: process.env.JWT_SECRET,
     //   signOptions: {

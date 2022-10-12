@@ -16,7 +16,7 @@ export class FilesController {
     private readonly filesService: FilesService,
 
     private readonly configService: ConfigService
-    ) { }
+  ) { }
 
 
   @Get('product/:imageName')
@@ -26,7 +26,7 @@ export class FilesController {
   ) {
 
     const path = this.filesService.getStaticProductImage(imageName);
-    
+
     res.sendFile(path);
   }
 
@@ -51,5 +51,26 @@ export class FilesController {
 
 
     return { secureUrl };
+  }
+
+
+  @Post('excel')
+  @UseInterceptors(FileInterceptor('file', {
+    fileFilter: FileFilter,
+    // limits: { fileSize: 1000},
+    storage: diskStorage({
+      destination: `./static/files`,
+      filename: FileNamer
+    })
+  }))
+  uploadMassiveUsers(
+    @UploadedFile() file: Express.Multer.File
+  ) {
+
+    if (!file) {
+      throw new BadRequestException('File not found.');
+    }
+
+    return this.filesService.readExcel(file);
   }
 }
