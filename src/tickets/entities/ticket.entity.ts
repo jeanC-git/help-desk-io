@@ -83,15 +83,20 @@ export class Ticket {
     childs: Ticket[];
 
 
-    @CreateDateColumn()
+    @CreateDateColumn({
+        type: 'timestamptz'
+    })
     createdAt: Date;
 
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({
+        type: 'timestamptz'
+    })
     updatedAt: Date;
 
 
     @DeleteDateColumn({
+        type: 'timestamptz',
         select: false
     })
     deletedAt: Date;

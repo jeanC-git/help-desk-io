@@ -12,6 +12,8 @@ import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { FindAllTicketDto } from './dto/find-all-tickets.dto';
 import { Taxonomy } from 'src/taxonomies/entities/taxonomy.entity';
 import { User } from 'src/auth/entities/user.entity';
+import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto';
+import { TaxonomiesService } from 'src/taxonomies/taxonomies.service';
 
 
 @Injectable()
@@ -29,6 +31,9 @@ export class TicketsService {
 
     @InjectRepository(Taxonomy)
     private readonly taxonomyRepository: Repository<Taxonomy>,
+
+
+    private readonly taxonomyService: TaxonomiesService,
 
 
     private readonly dataSource: DataSource,
@@ -117,8 +122,11 @@ export class TicketsService {
       query.leftJoinAndSelect(`tickets.creator`, 'creator');
 
 
-    if (options.loadRecords)
-      query.leftJoinAndSelect(`tickets.records`, 'records', '', { limit: 2 });
+    if (options.loadRecords){
+      query.leftJoinAndSelect(`tickets.records`, 'records');
+      query.leftJoinAndSelect('records.type', 'record_type')
+    }
+      
 
 
     query.leftJoinAndSelect(`tickets.type`, 'type');
@@ -148,15 +156,29 @@ export class TicketsService {
     await this.ticketRepository.softRemove(ticket);
   }
 
+  async updateTicketStatus(id: string, updateTicketStatus: UpdateTicketStatusDto) {
+
+    const { status } = updateTicketStatus;
+
+    const ticket = await this.findOne(id);
+
+    const statusDB = await this.taxonomyService.findOneByCode(status, 'Status')
+
+
+    ticket.status = statusDB;
+
+    await this.ticketRepository.save(ticket);
+  }
 
 
 
 
   // =================================== TICKET RECORDS ======================================
 
-  async addTicketRecord(title: string, body: string, ticket: Ticket, user: User) {
+  async addTicketRecord(title: string, body: string, type: Taxonomy, ticket: Ticket, user: User) {
+    // TODO: add record type
     const record = this.recordRepository.create({
-      title, body, ticket,
+      title, body, ticket, type,
       creator: user,
     });
 
@@ -164,10 +186,12 @@ export class TicketsService {
   }
 
   async addFirstTicketRecord(ticket: Ticket, user: User) {
-    const title = `Ticket #${ticket.id} was created.`;
+    const title = `Ticket was created.`;
     const body = ``;
 
-    await this.addTicketRecord(title, body, ticket, user);
+    const systemRecordStatus = await this.taxonomyService.findOneByCode('system-history', 'Record status');
+
+    await this.addTicketRecord(title, body, systemRecordStatus, ticket, user);
   }
 
 

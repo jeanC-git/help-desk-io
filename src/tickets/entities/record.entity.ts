@@ -2,6 +2,7 @@ import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToOne
 
 import { User } from "src/auth/entities/user.entity";
 import { Ticket } from "./ticket.entity";
+import { Taxonomy } from "src/taxonomies/entities/taxonomy.entity";
 
 
 
@@ -34,16 +35,28 @@ export class Record {
     @Column('text')
     body: string;
 
+    @ManyToOne(
+        () => Taxonomy,
+        () => { },
+        { nullable: false }
+    )
+    type: Taxonomy;
 
-    @CreateDateColumn()
+
+    @CreateDateColumn({
+        type: 'timestamptz'
+    })
     createdAt: Date;
 
 
-    @UpdateDateColumn()
+    @UpdateDateColumn({
+        type: 'timestamptz'
+    })
     updatedAt: Date;
 
 
     @DeleteDateColumn({
+        type: 'timestamptz',
         select: false
     })
     deletedAt: Date;

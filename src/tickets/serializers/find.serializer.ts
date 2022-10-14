@@ -10,8 +10,7 @@ export const FindAllTicketsSerializer = (data: Ticket[]) => {
         const { id, fullName, document, ...restCreatorData } = ticket.creator;
 
         const records = ticket.records ?? [];
-        console.log(ticket.id);
-        
+
         temp.push({
             id: ticket.id,
             title: ticket.title,
@@ -40,13 +39,17 @@ export const TicketRecordsSerializer = (records: Record[]) => {
     let temp = [];
 
     records.forEach(record => {
+        console.log({record});
         
+        const { name, code } = record.type;
+
         temp.push({
             id: record.id,
             title: record.title,
             body: record.body,
+            type: { name, code },
             createdAt: createDateFromFormat(record.createdAt)
-        })
+        });
     });
 
 

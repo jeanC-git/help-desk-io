@@ -11,6 +11,7 @@ import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { FindAllTicketDto } from './dto/find-all-tickets.dto';
 import { FindAllTicketsSerializer } from './serializers/find.serializer';
 import { AddRecordDto } from './dto/add-record.dto';
+import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto';
 
 
 
@@ -60,6 +61,15 @@ export class TicketsController {
     return success({}, `Ticket removed successfully.`)
   }
 
+  @Patch(':id/update-status')
+  async updateTicketStatus(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateTicketStatusDto: UpdateTicketStatusDto) {
+    await this.ticketsService.updateTicketStatus(id, updateTicketStatusDto)
+
+    return success({}, `Ticket updated successfully.`)
+  }
+
   // ========================= TICKETS - RECORDS ==============================
 
 
@@ -69,9 +79,11 @@ export class TicketsController {
     @Body() addRecordDto: AddRecordDto
   ) {
     const ticket = await this.ticketsService.findOne(id);
-    const { title, body, creator } = addRecordDto;
+    const { title, body, type, creator } = addRecordDto;
 
-    await this.ticketsService.addTicketRecord(title, body, ticket, creator)
+
+
+    await this.ticketsService.addTicketRecord(title, body, type, ticket, creator)
 
     return success({}, `Record created successfully.`);
   }

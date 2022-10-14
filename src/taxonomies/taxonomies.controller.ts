@@ -5,7 +5,7 @@ import { UpdateTaxonomyDto } from './dto/update-taxonomy.dto';
 
 @Controller('taxonomies')
 export class TaxonomiesController {
-  constructor(private readonly taxonomiesService: TaxonomiesService) {}
+  constructor(private readonly taxonomiesService: TaxonomiesService) { }
 
   @Post()
   create(@Body() createTaxonomyDto: CreateTaxonomyDto) {
@@ -19,7 +19,7 @@ export class TaxonomiesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.taxonomiesService.findOne(+id);
+    // return this.taxonomiesService.findOne(id, 'Taxonomy');
   }
 
   @Patch(':id')

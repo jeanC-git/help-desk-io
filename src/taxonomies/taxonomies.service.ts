@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTaxonomyDto } from './dto/create-taxonomy.dto';
@@ -22,8 +22,12 @@ export class TaxonomiesService {
     return `This action returns all taxonomies`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} taxonomy`;
+  async findOneByCode(code: string, resource: string) {
+    const taxonomy = await this.taxonomyRepository.findOneBy({ code })
+
+    if (!taxonomy) throw new NotFoundException(`${resource} with Code: ${code} not found.`);
+
+    return taxonomy;
   }
 
   update(id: number, updateTaxonomyDto: UpdateTaxonomyDto) {
