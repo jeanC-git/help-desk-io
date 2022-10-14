@@ -162,10 +162,7 @@ export class TicketsService {
 
     const ticket = await this.findOne(id);
 
-    const statusDB = await this.taxonomyService.findOneByCode(status, 'Status')
-
-
-    ticket.status = statusDB;
+    ticket.status = await this.taxonomyService.findOneByCode(status, 'Status')
 
     await this.ticketRepository.save(ticket);
   }
