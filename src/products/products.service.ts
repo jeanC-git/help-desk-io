@@ -162,8 +162,6 @@ export class ProductsService {
     } catch (error) {
       this.handleDBExceptions(error);
     }
-
-
   }
 
   private handleDBExceptions(error: any) {

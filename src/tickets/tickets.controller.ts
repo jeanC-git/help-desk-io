@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Body, Patch, Param,
-  Delete, Query, ParseUUIDPipe,
+  Delete, Query, ParseUUIDPipe, UsePipes, ValidationPipe,
 } from '@nestjs/common';
 
 import { success } from 'src/common/helpers';
@@ -12,6 +12,8 @@ import { FindAllTicketDto } from './dto/find-all-tickets.dto';
 import { FindAllTicketsSerializer } from './serializers/find.serializer';
 import { AddRecordDto } from './dto/add-record.dto';
 import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto';
+import { ParseTicketPipe } from './pipes/parse-ticket.pipe';
+import { Ticket } from './entities/ticket.entity';
 
 
 
@@ -21,8 +23,15 @@ export class TicketsController {
   constructor(private readonly ticketsService: TicketsService) { }
 
   // ========================= TICKETS ==============================
+
   @Post()
   async create(@Body() createTicketDto: CreateTicketDto) {
+
+
+    // return {
+    //   type: typeof createTicketDto.creator
+    // };
+
     await this.ticketsService.create(createTicketDto);
 
     return success({}, 'Ticket created successfully.');
@@ -30,9 +39,10 @@ export class TicketsController {
 
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseTicketPipe) ticket: Ticket,
     @Body() updateTicketDto: UpdateTicketDto) {
-    await this.ticketsService.update(id, updateTicketDto);
+
+    await this.ticketsService.update(ticket, updateTicketDto);
 
     return success({}, 'Ticket updated successfully.');
   }
@@ -63,9 +73,10 @@ export class TicketsController {
 
   @Patch(':id/update-status')
   async updateTicketStatus(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseTicketPipe) ticket: Ticket,
     @Body() updateTicketStatusDto: UpdateTicketStatusDto) {
-    await this.ticketsService.updateTicketStatus(id, updateTicketStatusDto)
+
+    await this.ticketsService.updateTicketStatus(ticket, updateTicketStatusDto)
 
     return success({}, `Ticket updated successfully.`)
   }
@@ -75,15 +86,15 @@ export class TicketsController {
 
   @Post(':id/add-record')
   async addTicketRecord(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('id', ParseTicketPipe) ticket: Ticket,
     @Body() addRecordDto: AddRecordDto
   ) {
-    const ticket = await this.ticketsService.findOne(id);
-    const { title, body, type, creator } = addRecordDto;
+    // const ticket = await this.ticketsService.findOne(id);
+    // const { title, body, type, creator } = addRecordDto;
 
 
 
-    await this.ticketsService.addTicketRecord(title, body, type, ticket, creator)
+    await this.ticketsService.addTicketRecord(ticket, addRecordDto)
 
     return success({}, `Record created successfully.`);
   }

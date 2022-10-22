@@ -27,10 +27,17 @@ export class Ticket {
 
     @ManyToOne(
         () => User,
-        user => user.tickets,
+        user => user.tickets_created,
         { eager: true }
     )
     creator: User;
+
+    @ManyToOne(
+        () => User,
+        user => user.tickets_assigned,
+        { eager: true, nullable: true }
+    )
+    support_rep: User;
 
 
     @Column({

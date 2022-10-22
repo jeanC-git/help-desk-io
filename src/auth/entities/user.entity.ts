@@ -56,7 +56,14 @@ export class User {
         () => Ticket,
         (ticket) => ticket.creator
     )
-    tickets: Ticket[];
+    tickets_created: Ticket[];
+
+
+    @OneToMany(
+        () => Ticket,
+        (ticket) => ticket.support_rep
+    )
+    tickets_assigned: Ticket[];
 
 
     @OneToMany(

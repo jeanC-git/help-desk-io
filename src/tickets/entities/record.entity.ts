@@ -23,7 +23,8 @@ export class Record {
 
     @ManyToOne(
         () => User,
-        (user) => user.ticket_records
+        (user) => user.ticket_records,
+        { nullable: true }
     )
     creator: User;
 

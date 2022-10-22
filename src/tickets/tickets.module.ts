@@ -9,6 +9,7 @@ import { TicketsService } from './tickets.service';
 
 import { TaxonomiesModule } from '../taxonomies/taxonomies.module';
 import { Record } from './entities/record.entity';
+import { AuthModule } from 'src/auth/auth.module';
 
 @Module({
   controllers: [TicketsController],
@@ -17,7 +18,9 @@ import { Record } from './entities/record.entity';
 
     TypeOrmModule.forFeature([Ticket, Record]),
 
-    TaxonomiesModule
+    TaxonomiesModule,
+
+    AuthModule
   ]
 })
 export class TicketsModule { }

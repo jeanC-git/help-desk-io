@@ -15,7 +15,7 @@ import { TicketsModule } from 'src/tickets/tickets.module';
   providers: [AuthService, JwtStrategy],
   imports: [
     ConfigModule,
-    
+
     TypeOrmModule.forFeature([User]),
 
     PassportModule.register({ defaultStrategy: 'jwt', }),
@@ -36,9 +36,9 @@ import { TicketsModule } from 'src/tickets/tickets.module';
         }
       },
 
-      
+
     })
-    
+
     // JwtModule.register({
     //   secret: process.env.JWT_SECRET,
     //   signOptions: {
@@ -46,6 +46,16 @@ import { TicketsModule } from 'src/tickets/tickets.module';
     //   }
     // }),
   ],
-  exports: [TypeOrmModule, JwtStrategy, PassportModule, JwtModule],
+  exports: [
+    TypeOrmModule,
+
+    JwtStrategy,
+
+    PassportModule,
+
+    JwtModule,
+
+    AuthService
+  ],
 })
 export class AuthModule { }

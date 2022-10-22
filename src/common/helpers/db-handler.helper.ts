@@ -1,5 +1,9 @@
 import { BadRequestException, InternalServerErrorException, Logger } from "@nestjs/common";
 
+const DBErros = [
+    "23505",
+    "23503"
+];
 
 
 export const handleDBExceptions = (error: any, source: string = 'DB Handler') => {
@@ -7,9 +11,20 @@ export const handleDBExceptions = (error: any, source: string = 'DB Handler') =>
 
     logger.error(error);
 
-    if (error.code === "23505") {
-        throw new BadRequestException(`${error.detail}`);
+    if (error.code === "23505") throw new BadRequestException(`${error.detail}`);
+
+
+    if (error.code === "23503") throw new BadRequestException(`${error.detail}`);
+
+
+
+
+
+    if (error.status == 404) {
+        throw new BadRequestException(`${error.message}`);
     }
+
+    console.log({ error });
 
 
     throw new InternalServerErrorException("Unexpected error - Check logs.");

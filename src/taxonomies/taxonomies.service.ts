@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { handleDBExceptions } from 'src/common/helpers';
 import { Repository } from 'typeorm';
 import { CreateTaxonomyDto } from './dto/create-taxonomy.dto';
 import { UpdateTaxonomyDto } from './dto/update-taxonomy.dto';
@@ -14,16 +15,18 @@ export class TaxonomiesService {
   ) { }
 
 
-  create(createTaxonomyDto: CreateTaxonomyDto) {
-    return 'This action adds a new taxonomy';
+  async create(createTaxonomyDto: CreateTaxonomyDto) {
+    const taxonomy = this.taxonomyRepository.create(createTaxonomyDto);
+
+    await this.taxonomyRepository.save(taxonomy);
   }
 
   findAll() {
     return `This action returns all taxonomies`;
   }
 
-  async findOneByCode(code: string, resource: string) {
-    const taxonomy = await this.taxonomyRepository.findOneBy({ code })
+  async findOne(group: string, type: string, code: string, resource: string = 'Record') {
+    const taxonomy = await this.taxonomyRepository.findOneBy({ group, type, code })
 
     if (!taxonomy) throw new NotFoundException(`${resource} with Code: ${code} not found.`);
 
@@ -36,5 +39,21 @@ export class TaxonomiesService {
 
   remove(id: number) {
     return `This action removes a #${id} taxonomy`;
+  }
+
+
+  async deleteAllTaxonomies() {
+
+    const query = this.taxonomyRepository.createQueryBuilder('taxonomies');
+
+    try {
+      return await query
+        .delete()
+        .where({})
+        .execute();
+
+    } catch (error) {
+      handleDBExceptions(error);
+    }
   }
 }

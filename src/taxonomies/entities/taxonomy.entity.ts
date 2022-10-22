@@ -48,6 +48,4 @@ export class Taxonomy {
         (taxonomy) => taxonomy.parent_taxonomy,
     )
     childs: Taxonomy[];
-
-
 }

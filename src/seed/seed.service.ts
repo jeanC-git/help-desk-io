@@ -7,6 +7,7 @@ import { ProductsService } from './../products/products.service';
 import { initialData } from './data/seed-data';
 
 import { User } from 'src/auth/entities/user.entity';
+import { TaxonomiesService } from 'src/taxonomies/taxonomies.service';
 
 @Injectable()
 export class SeedService {
@@ -14,6 +15,8 @@ export class SeedService {
 
   constructor(
     private readonly productsService: ProductsService,
+
+    private readonly taxonomiesService: TaxonomiesService,
 
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
@@ -24,10 +27,9 @@ export class SeedService {
 
     await this.deleteTables();
 
-    const adminUser = await this.insertUsers();
+    await this.insertUsers();
 
-    await this.insertNewProducts(adminUser);
-
+    await this.insertTaxonomies();
 
     return 'Seed executed.';
   }
@@ -53,25 +55,22 @@ export class SeedService {
       users.push(this.userRepository.create(user));
     });
 
-    const dbUsers = await this.userRepository.save(users);
-
-    return dbUsers[0];
-
+    await this.userRepository.save(users);
   }
 
-  private async insertNewProducts(user: User) {
+  private async insertTaxonomies() {
 
-    await this.productsService.deleteAllProducts();
+    await this.taxonomiesService.deleteAllTaxonomies();
 
 
-    const products = initialData.products;
+    const taxonomies = initialData.taxonomies;
 
     const insertPromises = [];
 
 
-    products.forEach(product => {
+    taxonomies.forEach(taxonomy => {
       insertPromises.push(
-        this.productsService.create(product, user)
+        this.taxonomiesService.create(taxonomy)
       );
     });
 

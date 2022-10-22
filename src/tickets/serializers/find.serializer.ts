@@ -39,7 +39,7 @@ export const TicketRecordsSerializer = (records: Record[]) => {
     let temp = [];
 
     records.forEach(record => {
-        console.log({record});
+        // console.log({record});
         
         const { name, code } = record.type;
 
