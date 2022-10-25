@@ -89,9 +89,8 @@ export class TicketsController {
     @Param('id', ParseTicketPipe) ticket: Ticket,
     @Body() addRecordDto: AddRecordDto
   ) {
-    // const ticket = await this.ticketsService.findOne(id);
-    // const { title, body, type, creator } = addRecordDto;
 
+    console.log({ ticket });
 
 
     await this.ticketsService.addTicketRecord(ticket, addRecordDto)

@@ -11,8 +11,8 @@ export class ParseTicketPipe implements PipeTransform {
   async transform(value: any, metadata: ArgumentMetadata) {
 
     let ticket = await this.ticketsService.findOne(value);
-    
-    if (!ticket ) throw new NotFoundException(`Ticket with ID "${value}" not found.`);
+
+    if (!ticket) throw new NotFoundException(`Ticket with ID "${value}" not found.`);
 
     return ticket;
   }
