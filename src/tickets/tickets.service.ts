@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 
@@ -16,6 +16,7 @@ import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto';
 import { TaxonomiesService } from 'src/taxonomies/taxonomies.service';
 import { AuthService } from 'src/auth/auth.service';
 import { AddRecordDto } from './dto/add-record.dto';
+import { TaxonomiesController } from 'src/taxonomies/taxonomies.controller';
 
 
 @Injectable()
@@ -128,8 +129,6 @@ export class TicketsService {
 
   async findOne(id: string) {
     const ticket = await this.ticketRepository.findOneBy({ id });
-    // const ticket = await this.ticketRepository.find({ where: { id } });
-    // const ticket = await this.ticketRepository.findOne({ where: { id } });
 
     if (!ticket) throw new NotFoundException(`Ticket with ID: ${id} not found.`);
 
@@ -206,6 +205,26 @@ export class TicketsService {
     await this.addTicketRecord(ticket, { title, body, type, creator: user });
   }
 
+  async generateStatuHistoryRecord() {
+
+  }
+
+  async generateCustomerResponseRecord() {
+
+  }
+
+  async generateSupportRepResponseRecord() {
+
+  }
+
+  async generateAssignmentHistoryRecord() {
+
+  }
+
+  async generateSystemHistoryRecord() {
+
+  }
+
   async generateRecordsOnUpdateStatus(ticket: Ticket, currentStatus: Taxonomy, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
     const case1 = currentStatus.code === 'opened' && newStatus.code === 'assigned';
     const case2 = currentStatus.code === 'assigned' && newStatus.code === 'in-progress';
@@ -228,27 +247,18 @@ export class TicketsService {
 
     } else if (currentStatus.code === 'resolved') {
 
-      if (newStatus.code === 'closed') { // (Case 2.1.1)
-        // TODO: create record.type.code "status-history"
-        // TODO: create record.type.code "system-history"
-        // await this.fromResolvedToClosed();
-      }
+      // (Case 2.1.1)
+      if (newStatus.code === 'closed') await this.fromResolvedToClosed(ticket, newStatus);
 
-      if (newStatus.code === 'in-progress') { // (Case 2.1.2)
-        // TODO: create record.type.code "status-history"
-        // TODO: create record.type.code "system-history"
-        // await this.fromResolvedToClosed();
-      }
+      // (Case 2.1.2)
+      if (newStatus.code === 'in-progress') await this.fromResolvedToInProgress(ticket, newStatus);
 
-    } else if (currentStatus.code === 'on-hold' && newStatus.code === 'in-progress') { // (Case 2.2.2
-      // TODO: create record.type.code "status-history"
-      // TODO: create record.type.code "customer-response"
-      // await this.fromOnHoldToInProgress():
-    } else if (case3) { // (Caso 3)
-      // TODO: create record.type.code "status-history"
-      // TODO: create record.type.code "system-history"
-      // await this.fromAnyToCanceled();
-    }
+      // (Case 2.2.2
+    } else if (currentStatus.code === 'on-hold' && newStatus.code === 'in-progress') await this.fromOnHoldToInProgress(ticket, newStatus, data);
+
+    // (Caso 3)
+    else if (case3) await this.fromAnyToCanceled(ticket, newStatus);
+
   }
 
 
@@ -304,7 +314,7 @@ export class TicketsService {
       ``,
       ticket,
       'status-history');
-    
+
     const { response } = data;
     await this.generateRecord(
       response.title,
@@ -321,7 +331,7 @@ export class TicketsService {
       ``,
       ticket,
       'status-history');
-    
+
     const assignedUser = await this.userService.findOne(data.assignTo.id);
 
     const title1 = `Ticket was assigned to ${assignedUser.fullName} (${assignedUser.id})`;
@@ -331,7 +341,7 @@ export class TicketsService {
       ticket,
       'assignment-history',
     );
-    
+
     const { response } = data;
     await this.generateRecord(
       response.title,
@@ -341,6 +351,71 @@ export class TicketsService {
     );
   }
 
+  async fromResolvedToClosed(ticket: Ticket, newStatus: Taxonomy) {
+
+    const title = `Ticket status changed to ${newStatus.name}.`;
+    await this.generateRecord(
+      title,
+      ``,
+      ticket,
+      'status-history');
+
+    const title2 = `Ticket status was updated to: ${newStatus.name}.`;
+    await this.generateRecord(
+      title2,
+      ``,
+      ticket,
+      'system-history');
+  }
+
+  async fromResolvedToInProgress(ticket: Ticket, newStatus: Taxonomy) {
+    const title = `Ticket status changed to ${newStatus.name}.`;
+    await this.generateRecord(
+      title,
+      ``,
+      ticket,
+      'status-history');
+
+    const title2 = `Ticket status was updated to: ${newStatus.name}`;
+    await this.generateRecord(
+      title2,
+      ``,
+      ticket,
+      'system-history');
+  }
+
+  async fromOnHoldToInProgress(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
+    const title = `Ticket status changed to ${newStatus.name}.`;
+    await this.generateRecord(
+      title,
+      ``,
+      ticket,
+      'status-history');
+
+    const { response } = data;
+    await this.generateRecord(
+      response.title,
+      response.body,
+      ticket,
+      'customer-response',
+    );
+  }
+
+  async fromAnyToCanceled(ticket: Ticket, newStatus: Taxonomy) {
+    const title = `Ticket status changed to ${newStatus.name}.`;
+    await this.generateRecord(
+      title,
+      ``,
+      ticket,
+      'status-history');
+
+    const title2 = `Ticket status was updated to: ${newStatus.name}.`;
+    await this.generateRecord(
+      title2,
+      ``,
+      ticket,
+      'system-history');
+  }
 
   // =================================== TICKET TYPE ======================================
   async getDefaultTicketType() {
