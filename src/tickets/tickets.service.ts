@@ -16,6 +16,7 @@ import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto';
 import { TaxonomiesService } from 'src/taxonomies/taxonomies.service';
 import { AuthService } from 'src/auth/auth.service';
 import { AddRecordDto } from './dto/add-record.dto';
+import { OptionsFindAllTickets } from './interfaces/OptionsFindAllTickets';
 
 
 @Injectable()
@@ -81,10 +82,10 @@ export class TicketsService {
     }
   }
 
-  async findAll(queryParams: FindAllTicketDto,
-                options:
-                  { loadCreator: boolean, loadRecords: boolean }
-                  = { loadCreator: false, loadRecords: false }) {
+  async findAll(
+    queryParams: FindAllTicketDto,
+    options: OptionsFindAllTickets = { loadCreator: false, loadRecords: false },
+  ) {
 
     const { limit = 10, offset = 0, filter = null, tags = null } = queryParams;
 
@@ -199,7 +200,7 @@ export class TicketsService {
     await this.addTicketRecord(ticket, { title, body, type, creator: user });
   }
 
-  async generateStatuHistoryRecord(ticket: Ticket, newStatus: Taxonomy) {
+  async generateStatusHistoryRecord(ticket: Ticket, newStatus: Taxonomy) {
     const title = `Ticket status changed to ${newStatus.name}.`;
 
     await this.generateRecord(
@@ -283,7 +284,7 @@ export class TicketsService {
     } else if (currentStatus.code === 'on-hold' && newStatus.code === 'in-progress')
       await this.fromOnHoldToInProgress(ticket, newStatus, data);
 
-    // (Caso 3)
+    // (Case 3)
     else if (case3) await this.fromAnyToCanceled(ticket, newStatus);
 
   }
@@ -307,7 +308,7 @@ export class TicketsService {
       'assignment-history',
     );
 
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title2 = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title2,
@@ -318,7 +319,7 @@ export class TicketsService {
   }
 
   async fromAssignedToInProgress(ticket: Ticket, newStatus: Taxonomy) {
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
@@ -328,7 +329,7 @@ export class TicketsService {
   }
 
   async fromInProgressToResolved(ticket: Ticket, newStatus: Taxonomy) {
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
@@ -338,7 +339,7 @@ export class TicketsService {
   }
 
   async fromInProgressToOnHold(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
@@ -357,7 +358,7 @@ export class TicketsService {
   }
 
   async fromInProgressToAssigned(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
@@ -388,7 +389,7 @@ export class TicketsService {
 
   async fromResolvedToClosed(ticket: Ticket, newStatus: Taxonomy) {
 
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
@@ -406,7 +407,7 @@ export class TicketsService {
   }
 
   async fromResolvedToInProgress(ticket: Ticket, newStatus: Taxonomy) {
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
@@ -424,7 +425,7 @@ export class TicketsService {
   }
 
   async fromOnHoldToInProgress(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
@@ -443,7 +444,7 @@ export class TicketsService {
   }
 
   async fromAnyToCanceled(ticket: Ticket, newStatus: Taxonomy) {
-    await this.generateStatuHistoryRecord(ticket, newStatus);
+    await this.generateStatusHistoryRecord(ticket, newStatus);
     // const title = `Ticket status changed to ${newStatus.name}.`;
     // await this.generateRecord(
     //   title,
