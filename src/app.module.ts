@@ -27,7 +27,7 @@ import { TaxonomiesModule } from './taxonomies/taxonomies.module';
       password: process.env.DB_PASSWORD,
       autoLoadEntities: true,
       synchronize: true,
-      logging: true
+      // logging: true
     }),
 
     ServeStaticModule.forRoot({

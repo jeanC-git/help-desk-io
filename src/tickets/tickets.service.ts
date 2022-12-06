@@ -17,6 +17,7 @@ import { TaxonomiesService } from 'src/taxonomies/taxonomies.service';
 import { AuthService } from 'src/auth/auth.service';
 import { AddRecordDto } from './dto/add-record.dto';
 import { OptionsFindAllTickets } from './interfaces/OptionsFindAllTickets';
+import { logTime } from '../common/helpers/commons.helpers';
 
 
 @Injectable()
@@ -86,7 +87,6 @@ export class TicketsService {
     queryParams: FindAllTicketDto,
     options: OptionsFindAllTickets = { loadCreator: false, loadRecords: false },
   ) {
-
     const { limit = 10, offset = 0, filter = null, tags = null } = queryParams;
 
     const query = this.ticketRepository.createQueryBuilder('tickets');

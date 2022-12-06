@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Body, Patch, Param,
-  Delete, Query, ParseUUIDPipe,
+  Delete, Query, ParseUUIDPipe, Version
 } from '@nestjs/common';
 
 import { success } from 'src/common/helpers';
@@ -16,11 +16,10 @@ import { ParseTicketPipe } from './pipes/parse-ticket.pipe';
 import { Ticket } from './entities/ticket.entity';
 
 
-
-
 @Controller('tickets')
 export class TicketsController {
-  constructor(private readonly ticketsService: TicketsService) { }
+  constructor(private readonly ticketsService: TicketsService) {
+  }
 
   // ========================= TICKETS ==============================
 
@@ -47,11 +46,13 @@ export class TicketsController {
     return success({}, 'Ticket updated successfully.');
   }
 
+
+  @Version('1')
   @Get()
   async findAll(@Query() queryParams: FindAllTicketDto) {
     const tickets = await this.ticketsService.findAll(
       queryParams,
-      { loadCreator: true, loadRecords: true }
+      { loadCreator: true, loadRecords: true },
     );
 
     return success(FindAllTicketsSerializer(tickets));
@@ -68,7 +69,7 @@ export class TicketsController {
   async remove(@Param('id', ParseUUIDPipe) id: string) {
     await this.ticketsService.remove(id);
 
-    return success({}, `Ticket removed successfully.`)
+    return success({}, `Ticket removed successfully.`);
   }
 
   @Patch(':id/update-status')
@@ -76,9 +77,9 @@ export class TicketsController {
     @Param('id', ParseTicketPipe) ticket: Ticket,
     @Body() updateTicketStatusDto: UpdateTicketStatusDto) {
 
-    await this.ticketsService.updateTicketStatus(ticket, updateTicketStatusDto)
+    await this.ticketsService.updateTicketStatus(ticket, updateTicketStatusDto);
 
-    return success({}, `Ticket updated successfully.`)
+    return success({}, `Ticket updated successfully.`);
   }
 
   // ========================= TICKETS - RECORDS ==============================
@@ -87,13 +88,13 @@ export class TicketsController {
   @Post(':id/add-record')
   async addTicketRecord(
     @Param('id', ParseTicketPipe) ticket: Ticket,
-    @Body() addRecordDto: AddRecordDto
+    @Body() addRecordDto: AddRecordDto,
   ) {
 
     console.log({ ticket });
 
 
-    await this.ticketsService.addTicketRecord(ticket, addRecordDto)
+    await this.ticketsService.addTicketRecord(ticket, addRecordDto);
 
     return success({}, `Record created successfully.`);
   }

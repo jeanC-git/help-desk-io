@@ -24,9 +24,8 @@ export class ProductsController {
   @ApiResponse({ status: 403, description: 'Forbidden. Token related.' })
   create(
     @Body() createProductDto: CreateProductDto,
-    @GetUser() user: User
   ) {
-    return this.productsService.create(createProductDto, user);
+    return this.productsService.create(createProductDto);
   }
 
   @Get()
@@ -45,7 +44,7 @@ export class ProductsController {
     @Body() updateProductDto: UpdateProductDto,
     @GetUser() user: User
   ) {
-    return this.productsService.update(id, updateProductDto, user);
+    return this.productsService.update(id, updateProductDto);
   }
 
   @Delete(':id')
