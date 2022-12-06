@@ -5,11 +5,10 @@ import { validate as isUUID } from 'uuid';
 
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
+import { CreateProductDto } from './dto';
+import { UpdateProductDto } from './dto';
 
 import { ProductImage, Product } from './entities';
-import { User } from '../auth/entities/user.entity';
 
 @Injectable()
 export class ProductsService {
@@ -28,7 +27,7 @@ export class ProductsService {
   ) { }
 
 
-  async create(createProductDto: CreateProductDto, user: User) {
+  async create(createProductDto: CreateProductDto) {
 
     try {
       const { images = [], ...productDetails } = createProductDto
@@ -100,7 +99,7 @@ export class ProductsService {
     }
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto, user: User) {
+  async update(id: string, updateProductDto: UpdateProductDto) {
 
     const { images, ...rest } = updateProductDto;
 

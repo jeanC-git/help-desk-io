@@ -1,14 +1,11 @@
-import { Transform } from "class-transformer";
 import { User } from "src/auth/entities/user.entity";
 import { Taxonomy } from "src/taxonomies/entities/taxonomy.entity";
 import {
-    Column, CreateDateColumn, DeleteDateColumn, Entity, Generated, ManyToOne,
+    Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne,
     OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn
 } from "typeorm";
 
 import { Record } from './record.entity'
-
-export const GROUP_SEARCH_ALL_TICKETS = 'search_all_tickets';
 
 @Entity({ name: 'tickets' })
 export class Ticket {

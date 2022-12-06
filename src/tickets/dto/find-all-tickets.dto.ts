@@ -1,7 +1,6 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 
-import { Type } from 'class-transformer';
-import { IsOptional, IsPositive, IsString, Min } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
 
 

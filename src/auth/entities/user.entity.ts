@@ -1,4 +1,3 @@
-import { Product } from "../../products/entities";
 import {
     BeforeInsert, BeforeUpdate, Column,
     Entity, OneToMany, PrimaryGeneratedColumn

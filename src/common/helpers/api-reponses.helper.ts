@@ -1,4 +1,4 @@
-export const success = (data: any = [], message: string = '', http_code: number = 200) => {
+export const success = (data: any = [], message = '', http_code = 200) => {
 
     return {
         data,

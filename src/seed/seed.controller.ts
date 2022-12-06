@@ -1,7 +1,5 @@
 import { Controller, Get} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { ValidRoles } from 'src/auth/interfaces';
-import { Auth } from '../auth/decorators';
 import { SeedService } from './seed.service';
 
 @ApiTags('Seed')

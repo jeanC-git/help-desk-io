@@ -1,5 +1,9 @@
 import {
-  BadRequestException, Injectable, InternalServerErrorException, NotFoundException, UnauthorizedException
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -9,7 +13,7 @@ import * as bcrypt from 'bcrypt';
 
 import { User } from './entities/user.entity';
 import { CreateUserDto, LoginUserDto } from './dto';
-import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { JwtPayload } from './interfaces';
 
 @Injectable()
 export class AuthService {
@@ -17,9 +21,9 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-
-    private readonly jwetService: JwtService
-  ) { }
+    private readonly jwtService: JwtService,
+  ) {
+  }
 
   async checkAuthStatus(user: User) {
 
@@ -35,7 +39,7 @@ export class AuthService {
 
       const user = this.userRepository.create({
         ...userData,
-        password: bcrypt.hashSync(password, 10)
+        password: bcrypt.hashSync(password, 10),
       });
 
       await this.userRepository.save(user);
@@ -43,7 +47,7 @@ export class AuthService {
 
       return {
         ...user,
-        token: this.generateJwt({ id: user.id })
+        token: this.generateJwt({ id: user.id }),
       };
 
     } catch (error) {
@@ -56,7 +60,7 @@ export class AuthService {
 
     const user = await this.userRepository.findOne({
       where: { email },
-      select: { email: true, password: true, id: true }
+      select: { email: true, password: true, id: true },
     });
 
     if (!user) throw new UnauthorizedException(`Credentials are not valid (user)`);
@@ -66,16 +70,13 @@ export class AuthService {
 
     return {
       ...user,
-      token: this.generateJwt({ id: user.id })
+      token: this.generateJwt({ id: user.id }),
     };
   }
 
 
   generateJwt(payload: JwtPayload) {
-
-    const token = this.jwetService.sign(payload);
-
-    return token;
+    return this.jwtService.sign(payload);
   }
 
   private handleDbErrors(error: any): never {
@@ -89,7 +90,7 @@ export class AuthService {
   }
 
   async findOne(id: string) {
-    const user = await this.userRepository.findOneBy({ id })
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) throw new NotFoundException(`User with ID: ${id} not found.`);
 

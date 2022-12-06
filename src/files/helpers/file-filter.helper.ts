@@ -1,6 +1,6 @@
 
 
-export const FileFilter = (req: Express.Request, file: Express.Multer.File, callback: Function) => {
+export const FileFilter = (req: Express.Request, file: Express.Multer.File, callback) => {
     
     if (!file) return callback(new Error('File is empty'), false);
 

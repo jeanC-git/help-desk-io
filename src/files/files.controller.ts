@@ -5,7 +5,7 @@ import { Controller, Post, UploadedFile, UseInterceptors, BadRequestException, G
 import { ApiTags } from '@nestjs/swagger';
 
 import { FilesService } from './files.service';
-import { FileFilter, FileNamer } from './helpers';
+import { FileFilter, FileName } from './helpers';
 import { ConfigService } from '@nestjs/config';
 
 
@@ -36,7 +36,7 @@ export class FilesController {
     // limits: { fileSize: 1000},
     storage: diskStorage({
       destination: `./static/products`,
-      filename: FileNamer
+      filename: FileName
     })
   }))
   uploadProductImage(
@@ -60,7 +60,7 @@ export class FilesController {
     // limits: { fileSize: 1000},
     storage: diskStorage({
       destination: `./static/files`,
-      filename: FileNamer
+      filename: FileName
     })
   }))
   uploadMassiveUsers(

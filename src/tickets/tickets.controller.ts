@@ -1,6 +1,6 @@
 import {
   Controller, Get, Post, Body, Patch, Param,
-  Delete, Query, ParseUUIDPipe, UsePipes, ValidationPipe,
+  Delete, Query, ParseUUIDPipe,
 } from '@nestjs/common';
 
 import { success } from 'src/common/helpers';

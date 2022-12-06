@@ -16,7 +16,6 @@ import { UpdateTicketStatusDto } from './dto/update-ticket-status.dto';
 import { TaxonomiesService } from 'src/taxonomies/taxonomies.service';
 import { AuthService } from 'src/auth/auth.service';
 import { AddRecordDto } from './dto/add-record.dto';
-import { TaxonomiesController } from 'src/taxonomies/taxonomies.controller';
 
 
 @Injectable()
@@ -41,13 +40,10 @@ export class TicketsService {
     try {
       const ticket = this.ticketRepository.create(createTicketDto);
 
-      const defaultInitStatus = await this.getInitTicketStatus();
-
-      ticket.status = defaultInitStatus;
+      ticket.status = await this.getInitTicketStatus();
 
       if (!createTicketDto.type) {
-        const defaultTicketType = await this.getDefaultTicketType();
-        ticket.type = defaultTicketType;
+        ticket.type = await this.getDefaultTicketType();
       }
 
       await this.ticketRepository.save(ticket);
@@ -86,9 +82,9 @@ export class TicketsService {
   }
 
   async findAll(queryParams: FindAllTicketDto,
-    options:
-      { loadCreator: boolean, loadRecords: boolean }
-      = { loadCreator: false, loadRecords: false }) {
+                options:
+                  { loadCreator: boolean, loadRecords: boolean }
+                  = { loadCreator: false, loadRecords: false }) {
 
     const { limit = 10, offset = 0, filter = null, tags = null } = queryParams;
 
@@ -119,12 +115,10 @@ export class TicketsService {
     query.leftJoinAndSelect(`tickets.type`, 'type');
     query.leftJoinAndSelect(`tickets.status`, 'status');
 
-    const tickets = await query
+    return await query
       .take(limit)
       .offset(offset)
       .getMany();
-
-    return tickets;
   }
 
   async findOne(id: string) {
@@ -205,24 +199,56 @@ export class TicketsService {
     await this.addTicketRecord(ticket, { title, body, type, creator: user });
   }
 
-  async generateStatuHistoryRecord() {
+  async generateStatuHistoryRecord(ticket: Ticket, newStatus: Taxonomy) {
+    const title = `Ticket status changed to ${newStatus.name}.`;
 
+    await this.generateRecord(
+      title,
+      ``,
+      ticket,
+      'status-history',
+    );
   }
 
-  async generateCustomerResponseRecord() {
-
+  async generateCustomerResponseRecord(ticket: Ticket, data: UpdateTicketStatusDto) {
+    const { response } = data;
+    await this.generateRecord(
+      response.title,
+      response.body,
+      ticket,
+      'customer-response',
+    );
   }
 
-  async generateSupportRepResponseRecord() {
-
+  async generateSupportRepResponseRecord(ticket: Ticket, data: UpdateTicketStatusDto) {
+    const { response } = data;
+    await this.generateRecord(
+      response.title,
+      response.body,
+      ticket,
+      'support-rep-response',
+    );
   }
 
-  async generateAssignmentHistoryRecord() {
+  async generateAssignmentHistoryRecord(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
+    const assignedUser = await this.userService.findOne(data.assignTo.id);
 
+    const title = `Ticket was assigned to ${assignedUser.fullName} (${assignedUser.id})`;
+    await this.generateRecord(
+      title,
+      ``,
+      ticket,
+      'assignment-history',
+    );
   }
 
-  async generateSystemHistoryRecord() {
-
+  async generateSystemHistoryRecord(ticket: Ticket, newStatus: Taxonomy) {
+    const title = `Ticket status was updated to: ${newStatus.name}.`;
+    await this.generateRecord(
+      title,
+      ``,
+      ticket,
+      'system-history');
   }
 
   async generateRecordsOnUpdateStatus(ticket: Ticket, currentStatus: Taxonomy, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
@@ -254,7 +280,8 @@ export class TicketsService {
       if (newStatus.code === 'in-progress') await this.fromResolvedToInProgress(ticket, newStatus);
 
       // (Case 2.2.2
-    } else if (currentStatus.code === 'on-hold' && newStatus.code === 'in-progress') await this.fromOnHoldToInProgress(ticket, newStatus, data);
+    } else if (currentStatus.code === 'on-hold' && newStatus.code === 'in-progress')
+      await this.fromOnHoldToInProgress(ticket, newStatus, data);
 
     // (Caso 3)
     else if (case3) await this.fromAnyToCanceled(ticket, newStatus);
@@ -280,141 +307,157 @@ export class TicketsService {
       'assignment-history',
     );
 
-    const title2 = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title2,
-      ``,
-      ticket,
-      'status-history',
-    );
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title2 = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title2,
+    //   ``,
+    //   ticket,
+    //   'status-history',
+    // );
   }
 
   async fromAssignedToInProgress(ticket: Ticket, newStatus: Taxonomy) {
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
   }
 
   async fromInProgressToResolved(ticket: Ticket, newStatus: Taxonomy) {
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
   }
 
   async fromInProgressToOnHold(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
 
-    const { response } = data;
-    await this.generateRecord(
-      response.title,
-      response.body,
-      ticket,
-      'support-rep-response',
-    );
+    await this.generateSupportRepResponseRecord(ticket, data);
+    // const { response } = data;
+    // await this.generateRecord(
+    //   response.title,
+    //   response.body,
+    //   ticket,
+    //   'support-rep-response',
+    // );
   }
 
   async fromInProgressToAssigned(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
 
-    const assignedUser = await this.userService.findOne(data.assignTo.id);
+    await this.generateAssignmentHistoryRecord(ticket, newStatus, data);
+    // const assignedUser = await this.userService.findOne(data.assignTo.id);
 
-    const title1 = `Ticket was assigned to ${assignedUser.fullName} (${assignedUser.id})`;
-    await this.generateRecord(
-      title1,
-      ``,
-      ticket,
-      'assignment-history',
-    );
+    // const title1 = `Ticket was assigned to ${assignedUser.fullName} (${assignedUser.id})`;
+    // await this.generateRecord(
+    //   title1,
+    //   ``,
+    //   ticket,
+    //   'assignment-history',
+    // );
 
-    const { response } = data;
-    await this.generateRecord(
-      response.title,
-      response.body,
-      ticket,
-      'support-rep-response',
-    );
+    await this.generateSupportRepResponseRecord(ticket, data);
+    // const { response } = data;
+    // await this.generateRecord(
+    //   response.title,
+    //   response.body,
+    //   ticket,
+    //   'support-rep-response',
+    // );
   }
 
   async fromResolvedToClosed(ticket: Ticket, newStatus: Taxonomy) {
 
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
 
-    const title2 = `Ticket status was updated to: ${newStatus.name}.`;
-    await this.generateRecord(
-      title2,
-      ``,
-      ticket,
-      'system-history');
+    await this.generateSystemHistoryRecord(ticket, newStatus);
+    // const title2 = `Ticket status was updated to: ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title2,
+    //   ``,
+    //   ticket,
+    //   'system-history');
   }
 
   async fromResolvedToInProgress(ticket: Ticket, newStatus: Taxonomy) {
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
 
-    const title2 = `Ticket status was updated to: ${newStatus.name}`;
-    await this.generateRecord(
-      title2,
-      ``,
-      ticket,
-      'system-history');
+    await this.generateSystemHistoryRecord(ticket, newStatus);
+    // const title2 = `Ticket status was updated to: ${newStatus.name}`;
+    // await this.generateRecord(
+    //   title2,
+    //   ``,
+    //   ticket,
+    //   'system-history');
   }
 
   async fromOnHoldToInProgress(ticket: Ticket, newStatus: Taxonomy, data: UpdateTicketStatusDto) {
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
 
-    const { response } = data;
-    await this.generateRecord(
-      response.title,
-      response.body,
-      ticket,
-      'customer-response',
-    );
+    await this.generateCustomerResponseRecord(ticket, data);
+    // const { response } = data;
+    // await this.generateRecord(
+    //   response.title,
+    //   response.body,
+    //   ticket,
+    //   'customer-response',
+    // );
   }
 
   async fromAnyToCanceled(ticket: Ticket, newStatus: Taxonomy) {
-    const title = `Ticket status changed to ${newStatus.name}.`;
-    await this.generateRecord(
-      title,
-      ``,
-      ticket,
-      'status-history');
+    await this.generateStatuHistoryRecord(ticket, newStatus);
+    // const title = `Ticket status changed to ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title,
+    //   ``,
+    //   ticket,
+    //   'status-history');
 
-    const title2 = `Ticket status was updated to: ${newStatus.name}.`;
-    await this.generateRecord(
-      title2,
-      ``,
-      ticket,
-      'system-history');
+    await this.generateSystemHistoryRecord(ticket, newStatus);
+    // const title2 = `Ticket status was updated to: ${newStatus.name}.`;
+    // await this.generateRecord(
+    //   title2,
+    //   ``,
+    //   ticket,
+    //   'system-history');
   }
 
   // =================================== TICKET TYPE ======================================

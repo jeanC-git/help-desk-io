@@ -1,6 +1,6 @@
 import { v4 as uuid } from 'uuid';
 
-export const FileNamer = (req: Express.Request, file: Express.Multer.File, callback: Function) => {
+export const FileName = (req: Express.Request, file: Express.Multer.File, callback) => {
 
     if (!file) return callback(new Error('File is empty'), false);
 

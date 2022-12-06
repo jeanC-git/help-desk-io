@@ -25,7 +25,7 @@ export class TaxonomiesService {
     return `This action returns all taxonomies`;
   }
 
-  async findOne(group: string, type: string, code: string, resource: string = 'Record') {
+  async findOne(group: string, type: string, code: string, resource = 'Record') {
     const taxonomy = await this.taxonomyRepository.findOneBy({ group, type, code })
 
     if (!taxonomy) throw new NotFoundException(`${resource} with code: '${code}' not found.`);

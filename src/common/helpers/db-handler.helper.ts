@@ -6,18 +6,17 @@ const DBErros = [
 ];
 
 
-export const handleDBExceptions = (error: any, source: string = 'DB Handler') => {
+export const handleDBExceptions = (error: any, source = 'DB Handler') => {
     const logger = new Logger(source);
 
     logger.error(error);
 
-    if (error.code === "23505") throw new BadRequestException(`${error.detail}`);
 
+    if(DBErros.includes(error.code))
+        throw  new BadRequestException(`${error.detail}`);
 
-    if (error.code === "23503") throw new BadRequestException(`${error.detail}`);
-
-
-
+    // if (error.code === "23505") throw new BadRequestException(`${error.detail}`);
+    // if (error.code === "23503") throw new BadRequestException(`${error.detail}`);
 
 
     if (error.status == 404) {
@@ -25,7 +24,6 @@ export const handleDBExceptions = (error: any, source: string = 'DB Handler') =>
     }
 
     console.log({ error });
-
 
     throw new InternalServerErrorException("Unexpected error - Check logs.");
 }

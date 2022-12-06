@@ -1,2 +1,2 @@
 export { FileFilter } from './file-filter.helper';
-export { FileNamer } from './file-namer.helper';
+export { FileName } from './file-namer.helper';
